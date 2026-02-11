@@ -1,12 +1,23 @@
+apiVersion: v1 
+kind: ConfigMap
+metadata: 
+   name: mysql
+   namespace: roboshop
+data:
+  my.cnf: |
+    [mysqld]
+    innob_redo_log_capacity = 2G
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongodb
+  name: mysql
   namespace: roboshop
   # these are replica set labels
   labels:
     project: roboshop
-    component: mongodb
+    component: mysql
     tier: db
 spec:
   replicas: 1
@@ -14,41 +25,52 @@ spec:
     # these labels are used to select pods
     matchLabels:
       project: roboshop
-      component: mongodb
+      component: mysql
       tier: db
   # pod definition
   template:
     metadata:
       labels:
         project: roboshop
-        component: mongodb
+        component: mysql
         tier: db
     spec:
       containers:
-      - name: mongodb
-        image: pallapraveena/mongodb:v1
+      - name: mysql
+        image: pallapraveena/mysql:v1
+        imagePullPolicy: Always
         readinessProbe:
           tcpSocket:
-            port: 27017
+            port: 3306
           initialDelaySeconds: 10
           periodSeconds: 10
         livenessProbe:
           tcpSocket:
-            port: 27017
+            port: 3306
           initialDelaySeconds: 20
           periodSeconds: 20
+        volumeMounts:
+        - name: mysql-config
+          mountPath: /etc/mysql/conf.d/my.cnf
+          subPath: my.cnf
+
+      volumes: 
+        - name: mysql-config
+          configMap: 
+             name: mysql
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb
+  name: mysql
   namespace: roboshop
 spec:
   selector:
     project: roboshop
-    component: mongodb
+    component: mysql
     tier: db
   ports: 
      - protocol: TCP
-       port: 27017 # service port
-       targetPort: 27017 # container port
+       port: 3306 # service port
+       targetPort: 3306 # container port

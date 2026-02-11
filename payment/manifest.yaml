@@ -3,21 +3,26 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-   name: catalogue
+   name: payment
    namespace: roboshop
 data:
-  MONGO: "true" 
-  MONGO_URL: "mongodb://mongodb:27017/catalogue"
+  CART_HOST: "cart"
+  CART_PORT: "8080" 
+  USER_HOST: "user" 
+  USER_PORT: "8080" 
+  AMQP_HOST: "rabbitmq" 
+  AMQP_USER: "roboshop" 
+  AMQP_PASS: "roboshop123"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalogue
+  name: payment
   namespace: roboshop
   # these are replica set labels
   labels:
     project: roboshop
-    component: catalogue
+    component: payment
     tier: backend
 spec:
   replicas: 1
@@ -25,23 +30,23 @@ spec:
     # these labels are used to select pods
     matchLabels:
       project: roboshop
-      component: catalogue
+      component: payment
       tier: backend
   # pod definition
   template:
     metadata:
       labels:
         project: roboshop
-        component: catalogue
+        component: payment
         tier: backend
     spec:
       containers:
-      - name: catalogue
-        image: pallapraveena/catalogue:v1
+      - name: payment
+        image: pallapraveena/payment:v1
         imagePullPolicy: Always
         envFrom: 
         - configMapRef:
-             name: catalogue
+             name: payment
         ports:
         - name: liveness-port
           containerPort: 8080
@@ -62,12 +67,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: catalogue
+  name: payment
   namespace: roboshop
 spec:
   selector:
     project: roboshop
-    component: catalogue
+    component: payment
     tier: backend
   ports: 
      - protocol: TCP
