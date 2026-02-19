@@ -6,7 +6,7 @@ metadata:
 data:
   my.cnf: |
     [mysqld]
-    innob_redo_log_capacity = 2G
+    innodb_redo_log_capacity = 2G
 
 ---
 apiVersion: apps/v1
