@@ -31,7 +31,7 @@ spec:
         - name: RABBITMQ_DEFAULT_USER
           value: roboshop
         - name: RABBITMQ_DEFAULT_PASS
-          value: robohsop123
+          value: roboshop123
         readinessProbe:
           tcpSocket:
             port: 5672
